@@ -45,6 +45,7 @@ function GetDistance(pos1, pos2) {
         return [x, y];
     }
     function getRoomDirectionSum(roomName1, roomName2) {
+        if (roomName1 === roomName2) return [0, 0];
         let [x1, y1] = getDirectionsRoom(roomName1);
         let [x2, y2] = getDirectionsRoom(roomName2);
         return [x2 - x1, y2 - y1];
@@ -64,26 +65,45 @@ function GetDistance(pos1, pos2) {
 function getTerrainPositions(pos, delta) {
     const terrain = Game.rooms[pos.roomName].lookAtArea(pos.y - delta, pos.x - delta, pos.y + delta, pos.x + delta);
 
-    let count = 0;
-    for (let x in terrain) {
-        for (let y in terrain[x]) {
+    let result = [];
+    for (let y in terrain) {
+        for (let x in terrain[y]) {
             if (x === pos.x && y === pos.y) continue;
-
-            for (let typeId in terrain[x][y]) {
-                if (terrain[x][y][typeId].type === 'terrain' &&
-                    terrain[x][y][typeId].terrain !== 'wall') {
-                    count ++;
+            let add = false;
+            for (let typeId in terrain[y][x]) {
+                if (terrain[y][x][typeId].type === LOOK_TERRAIN &&
+                    terrain[y][x][typeId].terrain !== 'wall') {
+                    add = true;
                     break;
                 }
-                if (terrain[x][y][typeId].type === 'structure' &&
-                    terrain[x][y][typeId].structure.structureType === STRUCTURE_ROAD) {
-                    count ++;
-                    break;
+            }
+            if (add)
+                result.push(new RoomPosition(x, y, pos.roomName))
+        }
+    }
+    return result;
+}
+
+function findTerrainStruct(pos, delta, structType) {
+    const terrain = Game.rooms[pos.roomName].lookAtArea(pos.y - delta, pos.x - delta, pos.y + delta, pos.x + delta);
+    for (let y in terrain) {
+        for (let x in terrain[y]) {
+            if (x === pos.x && y === pos.y) continue;
+
+            for (let typeId in terrain[y][x]) {
+                if (terrain[y][x][typeId].type === LOOK_STRUCTURES &&
+                    structType.includes(terrain[y][x][typeId].structure.structureType)) {
+                    return true;
+                }
+
+                if (terrain[y][x][typeId].type === LOOK_CONSTRUCTION_SITES &&
+                    structType.includes(terrain[y][x][typeId].constructionSite.structureType)) {
+                    return true;
                 }
             }
         }
     }
-    return count;
+    return false;
 }
 
 Object.assign(exports, {
@@ -91,4 +111,5 @@ Object.assign(exports, {
     GetCountOfBodyParts,
     GetDistance,
     getTerrainPositions,
+    findTerrainStruct,
 });

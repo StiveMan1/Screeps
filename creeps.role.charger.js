@@ -1,4 +1,4 @@
-const {CreepsTask, GetCountOfBodyParts, getTerrainPositions} = require("./creeps.tasks");
+const {CreepsTask, GetCountOfBodyParts, getTerrainPositions, findTerrainStruct} = require("./creeps.tasks");
 const {CreepType, RoomType, RoomMode} = require("./creeps.types");
 
 
@@ -63,7 +63,7 @@ function GetTasks(memRoom, gameRoom, roleTasks, memTasks, roomCreeps) {
             if (RoomType.My) memTask.data.total = SOURCE_ENERGY_CAPACITY / ENERGY_REGEN_TIME;
             else memTask.data.total = SOURCE_ENERGY_NEUTRAL_CAPACITY / ENERGY_REGEN_TIME;
             memTask.data.total = 10;
-            memTask.data.max_count = getTerrainPositions(target.pos, 1);
+            memTask.data.max_count = getTerrainPositions(target.pos, 1).length;
 
             if (memTask.data.miner != null && Game.creeps[memTasks[taskName].data.miner] == null)
                 delete memTask.data.miner;
@@ -106,6 +106,21 @@ function SelectTask(task, gameCreep, memCreep) {
             //     }
             // }
             task.data.miner = memCreep.name = gameCreep.name;
+
+            if (task.data.hasContainer == null) {
+                if (!findTerrainStruct(task.pos, 2, [STRUCTURE_LINK, STRUCTURE_CONTAINER])) {
+                    let pos = getTerrainPositions(task.pos, 1)[0]
+
+                    _.forEach([STRUCTURE_LINK, STRUCTURE_CONTAINER], (structType) => {
+                        if (memTask.data.hasContainer == null && CONTROLLER_STRUCTURES[structType][memRoom.level] > 0) {
+                            if (gameRoom.createConstructionSite(pos, structType) === OK)
+                                task.data.hasContainer = true;
+                        }
+                    })
+                } else {
+                    task.data.hasContainer = true;
+                }
+            }
         }
     } else {
         task.data.predict += memCreep.capacity = gameCreep.store.getFreeCapacity();
@@ -142,6 +157,9 @@ function WorkChange(task, gameCreep, memCreep) {
 function tryToWork(task, gameCreep, gameObj) {
     if (gameObj == null) return ERR_INVALID_ARGS;
     if (task.name === SubTasks.Source) {
+        // if () {
+        //
+        // }
         return gameCreep.harvest(gameObj);
     } else if (task.name === SubTasks.Drops) {
         return gameCreep.pickup(gameObj);

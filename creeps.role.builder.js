@@ -26,7 +26,7 @@ function GetTasks(memRoom, gameRoom, roleTasks, memTasks, roomCreeps) {
 
     _.forEach(targets, (target) => {
         task = new CreepsTask("", RoleName, [CreepType.Worker], target.pos);
-        if ([STRUCTURE_CONTAINER, STRUCTURE_SPAWN].includes(target.structureType))
+        if ([STRUCTURE_CONTAINER, STRUCTURE_LINK, STRUCTURE_SPAWN].includes(target.structureType))
             task.type.push(CreepType.Miner);
         taskName = task.getName();
         roleTasks.push(taskName);
