@@ -65,6 +65,10 @@ function GetTasks(memRoom, gameRoom, roleTasks, memTasks, roomCreeps) {
             memTask.data.total = 10;
             memTask.data.max_count = getTerrainPositions(target.pos, 1).length;
 
+            if (memTask.data.hasContainer == null &&
+                    findTerrainStruct(memTask.pos, 2, [STRUCTURE_LINK, STRUCTURE_CONTAINER]))
+                memTask.data.hasContainer = true;
+
             if (memTask.data.miner != null && Game.creeps[memTasks[taskName].data.miner] == null)
                 delete memTask.data.miner;
 
@@ -107,12 +111,14 @@ function SelectTask(task, gameCreep, memCreep) {
             // }
             task.data.miner = memCreep.name = gameCreep.name;
 
-            if (task.data.hasContainer == null) {
+            if (task.data.hasContainer == null && Game.rooms[task.pos.roomName] != null) {
                 if (!findTerrainStruct(task.pos, 2, [STRUCTURE_LINK, STRUCTURE_CONTAINER])) {
                     let pos = getTerrainPositions(task.pos, 1)[0]
 
                     _.forEach([STRUCTURE_LINK, STRUCTURE_CONTAINER], (structType) => {
-                        if (memTask.data.hasContainer == null && CONTROLLER_STRUCTURES[structType][memRoom.level] > 0) {
+                        let memRoom = Memory.rooms[task.pos.roomName];
+                        let gameRoom = Game.rooms[task.pos.roomName];
+                        if (task.data.hasContainer == null && CONTROLLER_STRUCTURES[structType][memRoom.level] > 0) {
                             if (gameRoom.createConstructionSite(pos, structType) === OK)
                                 task.data.hasContainer = true;
                         }

@@ -23,7 +23,7 @@ const RoomMode = {
     MakeAttack  : "M",
 }
 
-const FriendsNames = ["Mark", 'Outora', "Outora0", "Source Keeper"]
+const FriendsNames = ["Mark", 'Outora', "Outora0"]
 const MyName = "StiveMan"
 
 

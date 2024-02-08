@@ -17,7 +17,7 @@ function GetTasks(memRoom, gameRoom, roleTasks, memTasks, roomCreeps) {
 
     if (memRoom.mode === RoomMode.MakeAttack) return;
     // HOSTILE_CREEPS
-    if ([RoomMode.UnderAttack, RoomMode.MakeAttack].includes(memRoom.mode)) {
+    if ([RoomMode.UnderAttack, RoomMode.MakeAttack].includes(memRoom.mode) && [RoomType.My, RoomType.Friends].includes(memRoom.type)) {
         targets = hostileCreeps(gameRoom);
         _.forEach(targets, (target) => {
             task = new CreepsTask(SubTasks.Creep, RoleName, [CreepType.Attacker], target.pos);
